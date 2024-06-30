@@ -139,3 +139,10 @@ resource "aws_s3_bucket" "logs" {
     yor_trace            = "01946fe9-aae2-4c99-a975-e9b0d3a4696c"
   })
 }
+
+module "jit-teams-images" {
+  source                        = "../s3-bucket"
+  bucket_name                   = "jit-teams-images"
+  stage                         = var.stage
+  count = var.local_deployment ? 0 : 1
+}
