@@ -1,0 +1,158 @@
+rules:
+  - id: ec2-imdsv1-optional
+    languages:
+      - hcl
+    message: AWS EC2 Instance allowing use of the IMDSv1
+    metadata:
+      cwe:
+        - "CWE-918: Server-Side Request Forgery (SSRF)"
+      references:
+        - https://aws.amazon.com/blogs/security/defense-in-depth-open-firewalls-reverse-proxies-ssrf-vulnerabilities-ec2-instance-metadata-service
+        - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#metadata-options
+      category: security
+      technology:
+        - terraform
+        - aws
+      owasp:
+        - A10:2021 - Server-Side Request Forgery (SSRF)
+      cwe2022-top25: true
+      cwe2021-top25: true
+      subcategory:
+        - vuln
+      likelihood: LOW
+      impact: MEDIUM
+      confidence: MEDIUM
+      license: Semgrep Rules License v1.0. For more details, visit
+        semgrep.dev/legal/rules-license
+      vulnerability_class:
+        - Server-Side Request Forgery (SSRF)
+    pattern-either:
+      - patterns:
+          - pattern: http_tokens = "optional"
+          - pattern-inside: |
+              metadata_options { ... }
+      - patterns:
+          - pattern: |
+              resource "aws_instance" "$NAME" {
+                ...
+              }
+          - pattern-not: |
+              resource "aws_instance" "$NAME" {
+                ...
+                metadata_options {
+                  ...
+                  http_tokens = "required"
+                  ...
+                }
+                ...
+              }
+          - pattern-not: |
+              resource "aws_instance" "$NAME" {
+                ...
+                metadata_options {
+                  ...
+                  http_tokens = "optional"
+                  ...
+                }
+                ...
+              }
+          - pattern-not: |
+              resource "aws_instance" "$NAME" {
+                ...
+                metadata_options {
+                  ...
+                  http_endpoint = "disabled"
+                  ...
+                }
+                ...
+              }
+    severity: ERROR
+  - id: storage-use-secure-tls-policy
+    message: "Azure Storage currently supports three versions of the TLS protocol:
+      1.0, 1.1, and 1.2. Azure Storage uses TLS 1.2 on public HTTPS endpoints,
+      but TLS 1.0 and TLS 1.1 are still supported for backward compatibility.
+      This check will warn if the minimum TLS is not set to TLS1_2."
+    patterns:
+      - pattern-either:
+          - pattern-inside: |
+              resource "azurerm_storage_account" "..." {
+                ...
+                min_tls_version = "$ANYTHING"
+                ...
+              }
+          - pattern-inside: |
+              resource "azurerm_storage_account" "..." {
+                ...
+              }
+      - pattern-not-inside: |
+          resource "azurerm_storage_account" "..." {
+            ...
+            min_tls_version = "TLS1_2"
+            ...
+          }
+    metadata:
+      cwe:
+        - "CWE-326: Inadequate Encryption Strength"
+      category: security
+      technology:
+        - terraform
+        - azure
+      references:
+        - https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_account#min_tls_version
+        - https://docs.microsoft.com/en-us/azure/storage/common/transport-layer-security-configure-minimum-version
+      owasp:
+        - A03:2017 - Sensitive Data Exposure
+        - A02:2021 - Cryptographic Failures
+      subcategory:
+        - vuln
+      likelihood: MEDIUM
+      impact: MEDIUM
+      confidence: MEDIUM
+      license: Semgrep Rules License v1.0. For more details, visit
+        semgrep.dev/legal/rules-license
+      vulnerability_class:
+        - Cryptographic Issues
+    languages:
+      - hcl
+    severity: ERROR
+
+  - id: aws-rds-backup-no-retention
+    patterns:
+      - pattern-either:
+          - pattern: |
+              resource "aws_rds_cluster" $ANYTHING {
+                ...
+                backup_retention_period = 0
+                ...
+              }
+          - pattern: |
+              resource "aws_db_instance" $ANYTHING {
+                ...
+                backup_retention_period = 0
+                ...
+              }
+    message: The AWS RDS has no retention. Missing retention can cause losing
+      important event information. To fix this, set a `backup_retention_period`.
+    languages:
+      - hcl
+    severity: WARNING
+    metadata:
+      owasp:
+        - A03:2017 - Sensitive Data Exposure
+      cwe:
+        - "CWE-320: CWE CATEGORY: Key Management Errors"
+      technology:
+        - aws
+        - terraform
+      category: security
+      references:
+        - https://owasp.org/Top10/A02_2021-Cryptographic_Failures
+      subcategory:
+        - vuln
+      likelihood: MEDIUM
+      impact: MEDIUM
+      confidence: MEDIUM
+      license: Semgrep Rules License v1.0. For more details, visit
+        semgrep.dev/legal/rules-license
+      vulnerability_class:
+        - Cryptographic Issues
