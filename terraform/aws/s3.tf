@@ -20,6 +20,18 @@ resource "aws_s3_bucket" "data" {
   })
 }
 
+
+resource "aws_s3_bucket_versioning" "data" {
+  bucket = aws_s3_bucket.data.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+
+
+
 resource "aws_s3_bucket_object" "data_object" {
   bucket = aws_s3_bucket.data.id
   key    = "customer-master.xlsx"
@@ -138,4 +150,16 @@ resource "aws_s3_bucket" "logs" {
     git_repo             = "terragoat"
     yor_trace            = "01946fe9-aae2-4c99-a975-e9b0d3a4696c"
   })
+}
+
+
+resource "aws_s3_bucket" "logs_log_bucket" {
+  bucket = "logs-log-bucket"
+}
+
+resource "aws_s3_bucket_logging" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  target_bucket = aws_s3_bucket.logs_log_bucket.id
+  target_prefix = "log/"
 }
