@@ -11,7 +11,7 @@ resource "aws_instance" "web_host" {
 sudo apt-get update
 sudo apt-get install -y apache2
 sudo systemctl start apache2
-sudo systemctl enable apache2
+sudo systemctl enable apache2 
 export AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMAAA
 export AWS_SECRET_ACCESS_KEY=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
 export AWS_DEFAULT_REGION=us-west-2
@@ -31,6 +31,9 @@ EOF
   })
 }
 
+
+
+
 resource "aws_ebs_volume" "web_host_storage" {
   # unencrypted volume
   availability_zone = "${var.region}a"
@@ -48,7 +51,10 @@ resource "aws_ebs_volume" "web_host_storage" {
     git_repo             = "terragoat"
     yor_trace            = "c5509daf-10f0-46af-9e03-41989212521d"
   })
+  encrypted = false
+  # Joe
 }
+
 
 resource "aws_ebs_snapshot" "example_snapshot" {
   # ebs snapshot without encryption
