@@ -9,7 +9,7 @@ resource azurerm_kubernetes_cluster "k8s_cluster" {
   default_node_pool {
     name       = "default"
     vm_size    = "Standard_D2_v2"
-    node_count = 2
+    node_count = 3
   }
   addon_profile {
     oms_agent {
