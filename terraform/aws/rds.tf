@@ -13,6 +13,7 @@ resource "aws_rds_cluster" "app1-rds-cluster" {
     yor_trace            = "b6f2c2ec-0715-46a0-83d4-502e588826d1"
   }
   
+  storage_encrypted = true
 }
 
 resource "aws_rds_cluster" "app2-rds-cluster" {
