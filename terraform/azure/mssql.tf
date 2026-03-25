@@ -15,6 +15,7 @@ resource "azurerm_storage_account" "security_storage_account" {
     git_repo             = "terragoat"
     yor_trace            = "4b504d4d-608c-45fe-ae56-807bde6d969f"
   }
+  allow_nested_items_to_be_public = true
 }
 
 resource "azurerm_mssql_server" "mssql1" {
